@@ -1,9 +1,10 @@
 package main
 
 import (
-	"fmt"
 	"math/rand"
 	"time"
+
+	"github.com/anishmadan/Sorting-Visualizer/sorting"
 )
 
 func setup(a []int) {
@@ -21,14 +22,11 @@ func shuffle(a []int) {
 }
 
 func main() {
-	a := make([]int, 50)
+	A := make([]int, 50)
 
-	setup(a)
+	setup(A)
 
-	fmt.Println(a)
+	shuffle(A)
 
-	shuffle(a)
-
-	fmt.Println(a)
-
+	sorting.InsertionSort(A)
 }
