@@ -4,9 +4,8 @@ import (
 	"math/rand"
 	"time"
 
-	"github.com/anishmadan/Sorting-Visualizer/sorting"
-
 	"github.com/andlabs/ui"
+	"github.com/anishmadan/Sorting-Visualizer/sorting"
 )
 
 func setup(a []int) {
@@ -24,10 +23,12 @@ func shuffle(a []int) {
 }
 
 var (
-	sortButton *ui.Button
-	typeOfSort *ui.Combobox
-	attrstr    *ui.AttributedString
-	A          []int
+	sortButton    *ui.Button
+	shuffleButton *ui.Button
+	typeOfSort    *ui.Combobox
+	attrstr       *ui.AttributedString
+	A             []int
+	sortSelected  int
 )
 
 type areaHandler struct{}
@@ -37,24 +38,12 @@ func (areaHandler) Draw(a *ui.Area, dp *ui.AreaDrawParams) {
 	for i, x := range A {
 		p := ui.DrawNewPath(ui.DrawFillModeWinding)
 		p.NewFigure(0, 0)
-		p.AddRectangle((float64)(i*10+15), 0, 5, (float64)(10*x))
+		p.AddRectangle((float64)(i*10+15), 0, 5, (float64)(5*x))
 		p.End()
 		dp.Context.Fill(p, &ui.DrawBrush{Type: ui.DrawBrushTypeSolid, R: .75, G: .25, B: 0, A: 1})
 		p.Free()
 	}
 
-	// fmt.Println(len(A))
-
-	// p.NewFigure(0, 0)
-	// p.AddRectangle(0, 0, 10, 10)
-	// p.End()
-
-	// p.NewFigure(10, 10)
-	// p.LineTo(dp.ClipWidth-10, 10)
-	// p.LineTo(dp.ClipWidth-10, dp.ClipHeight-10)
-	// p.LineTo(10, dp.ClipHeight-10)
-	// p.CloseFigure()
-	// p.End()
 }
 
 func (areaHandler) MouseEvent(a *ui.Area, me *ui.AreaMouseEvent) {
@@ -75,7 +64,7 @@ func (areaHandler) KeyEvent(a *ui.Area, ke *ui.AreaKeyEvent) (handled bool) {
 }
 
 func setupUI() {
-	mainwin := ui.NewWindow("Sorting Example", 640, 480, true)
+	mainwin := ui.NewWindow("Sorting Examples", 1640, 1480, true)
 	mainwin.SetMargined(true)
 	mainwin.OnClosing(func(*ui.Window) bool {
 		mainwin.Destroy()
@@ -99,10 +88,19 @@ func setupUI() {
 
 	sortButton = ui.NewButton("Sort")
 	sortButton.OnClicked(func(*ui.Button) {
-		sorting.InsertionSort(A, area)
-		//area.QueueRedrawAll()
+		if sortSelected == 0 {
+			sorting.InsertionSort(A)
+		}
+		area.QueueRedrawAll()
 	})
 	vbox.Append(sortButton, false)
+
+	shuffleButton = ui.NewButton("Shuffle")
+	shuffleButton.OnClicked(func(*ui.Button) {
+		shuffle(A)
+		area.QueueRedrawAll()
+	})
+	vbox.Append(shuffleButton, false)
 
 	form := ui.NewForm()
 	form.SetPadded(true)
@@ -114,8 +112,9 @@ func setupUI() {
 	typeOfSort.Append("Insertion")
 	typeOfSort.SetSelected(0) // start with insertion sort
 	typeOfSort.OnSelected(func(*ui.Combobox) {
-		area.QueueRedrawAll()
+		sortSelected = typeOfSort.Selected()
 	})
+
 	form.Append("Type of Sort", typeOfSort, false)
 
 	hbox.Append(area, true)
@@ -124,7 +123,7 @@ func setupUI() {
 }
 
 func main() {
-	A = make([]int, 50)
+	A = make([]int, 100)
 	setup(A)
 	shuffle(A)
 

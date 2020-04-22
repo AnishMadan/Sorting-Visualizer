@@ -4,11 +4,9 @@ import (
 	"fmt"
 	"math/rand"
 	"time"
-
-	"github.com/andlabs/ui"
 )
 
-func InsertionSort(A []int, area *ui.Area) {
+func InsertionSort(A []int) {
 	counter := 0
 
 	i := 1
@@ -19,8 +17,6 @@ func InsertionSort(A []int, area *ui.Area) {
 			A[j], A[j-1] = A[j-1], A[j]
 			j--
 			counter++
-			area.QueueRedrawAll()
-			time.Sleep(time.Second / 200)
 			fmt.Println(A)
 		}
 
