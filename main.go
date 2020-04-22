@@ -8,42 +8,45 @@ import (
 	"github.com/anishmadan/Sorting-Visualizer/sorting"
 )
 
-func setup(a []int) {
-	for i := range a {
-		a[i] = i + 1
-	}
-}
-
-func shuffle(a []int) {
-	r := rand.New(rand.NewSource(time.Now().Unix()))
-	for n := len(a); n > 0; n-- {
-		randIndex := r.Intn(n)
-		a[n-1], a[randIndex] = a[randIndex], a[n-1]
-	}
-}
-
 var (
-	sortButton    *ui.Button
-	shuffleButton *ui.Button
-	typeOfSort    *ui.Combobox
-	attrstr       *ui.AttributedString
-	A             []int
-	sortSelected  int
+	iterationLabel *ui.Label
+	sortButton     *ui.Button
+	shuffleButton  *ui.Button
+	typeOfSort     *ui.Combobox
+	attrstr        *ui.AttributedString
+
+	// A is an array for sorting
+	A            []int
+	sortSelected int
 )
+
+func setup(A []int) {
+	for i := range A {
+		A[i] = i + 1
+	}
+}
+
+func shuffle(A []int) {
+	r := rand.New(rand.NewSource(time.Now().Unix()))
+	for n := len(A); n > 0; n-- {
+		randIndex := r.Intn(n)
+		A[n-1], A[randIndex] = A[randIndex], A[n-1]
+	}
+}
 
 type areaHandler struct{}
 
 func (areaHandler) Draw(a *ui.Area, dp *ui.AreaDrawParams) {
+	p := ui.DrawNewPath(ui.DrawFillModeWinding)
 
 	for i, x := range A {
-		p := ui.DrawNewPath(ui.DrawFillModeWinding)
 		p.NewFigure(0, 0)
-		p.AddRectangle((float64)(i*10+15), 0, 5, (float64)(5*x))
-		p.End()
-		dp.Context.Fill(p, &ui.DrawBrush{Type: ui.DrawBrushTypeSolid, R: .75, G: .25, B: 0, A: 1})
-		p.Free()
+		p.AddRectangle((float64)(i*10+15), 0, 5, (float64)(7*x))
 	}
+	p.End()
 
+	dp.Context.Fill(p, &ui.DrawBrush{Type: ui.DrawBrushTypeSolid, R: .75, G: .25, B: 0, A: 1})
+	p.Free()
 }
 
 func (areaHandler) MouseEvent(a *ui.Area, me *ui.AreaMouseEvent) {
@@ -89,33 +92,37 @@ func setupUI() {
 	sortButton = ui.NewButton("Sort")
 	sortButton.OnClicked(func(*ui.Button) {
 		if sortSelected == 0 {
-			sorting.InsertionSort(A)
+			go sorting.InsertionSort(A, area, iterationLabel)
+		} else if sortSelected == 1 {
+			go sorting.BubbleSort(A, area, iterationLabel)
 		}
-		area.QueueRedrawAll()
 	})
 	vbox.Append(sortButton, false)
 
 	shuffleButton = ui.NewButton("Shuffle")
 	shuffleButton.OnClicked(func(*ui.Button) {
 		shuffle(A)
+		iterationLabel.SetText("")
 		area.QueueRedrawAll()
 	})
 	vbox.Append(shuffleButton, false)
 
 	form := ui.NewForm()
 	form.SetPadded(true)
-	// TODO on OS X if this is set to 1 then the window can't resize; does the form not have the concept of stretchy trailing space?
 	vbox.Append(form, false)
 
 	typeOfSort = ui.NewCombobox()
-	// note that the items match with the values of the uiDrawTextAlign values
 	typeOfSort.Append("Insertion")
+	typeOfSort.Append("Bubble")
 	typeOfSort.SetSelected(0) // start with insertion sort
 	typeOfSort.OnSelected(func(*ui.Combobox) {
 		sortSelected = typeOfSort.Selected()
 	})
 
-	form.Append("Type of Sort", typeOfSort, false)
+	form.Append("Type of Sort ", typeOfSort, false) //TODO align left
+
+	iterationLabel = ui.NewLabel("")
+	form.Append("Number of Iterations: ", iterationLabel, false)
 
 	hbox.Append(area, true)
 

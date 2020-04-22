@@ -3,10 +3,14 @@ package sorting
 import (
 	"fmt"
 	"math/rand"
+	"strconv"
 	"time"
+
+	"github.com/andlabs/ui"
 )
 
-func InsertionSort(A []int) {
+// InsertionSort implementation
+func InsertionSort(A []int, area *ui.Area, iterationLabel *ui.Label) int {
 	counter := 0
 
 	i := 1
@@ -17,28 +21,39 @@ func InsertionSort(A []int) {
 			A[j], A[j-1] = A[j-1], A[j]
 			j--
 			counter++
+			time.Sleep(time.Second / 200)
+			ui.QueueMain(func() {
+				area.QueueRedrawAll()
+				iterationLabel.SetText(strconv.Itoa(counter))
+			})
 			fmt.Println(A)
 		}
 
 		i++
 	}
 	fmt.Printf("%d iterations for Insertion Sort \n", counter)
+	return counter
 }
 
-// BubbleSort implementation with 1/20th second time interval between printing
-func BubbleSort(A []int) {
+// BubbleSort implementation
+func BubbleSort(A []int, area *ui.Area, iterationLabel *ui.Label) int {
 	counter := 0
 	for i := 0; i < len(A); i++ {
 		for j := 0; j < len(A)-i-1; j++ {
 			if A[j] > A[j+1] {
 				A[j], A[j+1] = A[j+1], A[j]
 			}
-			time.Sleep(time.Second / 200)
 			fmt.Println(A)
 			counter++
+			time.Sleep(time.Second / 200)
+			ui.QueueMain(func() {
+				area.QueueRedrawAll()
+				iterationLabel.SetText(strconv.Itoa(counter))
+			})
 		}
 	}
 	fmt.Printf("%d iterations for Bubble Sort \n", counter)
+	return counter
 }
 
 func choosePivot(A []int) int {
