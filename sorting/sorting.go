@@ -17,6 +17,8 @@ func Sort(A []int, area *ui.Area, iterationLabel *ui.Label) {
 		go bubbleSort(A, area, iterationLabel)
 	} else if config.SortType == 2 {
 		go bogoSort(A, area, iterationLabel)
+	} else if config.SortType == 3 {
+		go quickSort(A, area, iterationLabel)
 	}
 }
 
@@ -39,6 +41,7 @@ func isSorted(A []int) bool {
 			return false
 		}
 	}
+
 	return true
 }
 
@@ -49,7 +52,7 @@ func bogoSort(A []int, area *ui.Area, iterationLabel *ui.Label) {
 		if config.Stop || config.SortType != 2 {
 			break
 		}
-		time.Sleep(time.Second / time.Duration(config.SortSpeed/2))
+		time.Sleep(time.Second / time.Duration(config.SortSpeed/5))
 		ui.QueueMain(func() {
 			area.QueueRedrawAll()
 			iterationLabel.SetText(strconv.Itoa(config.RunningTotal))
@@ -79,7 +82,7 @@ func insertionSort(A []int, area *ui.Area, iterationLabel *ui.Label) {
 				break
 			}
 
-			time.Sleep(time.Second / time.Duration(config.SortSpeed/2))
+			time.Sleep(time.Second / time.Duration(config.SortSpeed/5))
 			ui.QueueMain(func() {
 				area.QueueRedrawAll()
 				iterationLabel.SetText(strconv.Itoa(config.RunningTotal))
@@ -110,9 +113,8 @@ func bubbleSort(A []int, area *ui.Area, iterationLabel *ui.Label) {
 				break
 			}
 
-			fmt.Println(A)
 			config.RunningTotal++
-			time.Sleep(time.Second / time.Duration(config.SortSpeed/2))
+			time.Sleep(time.Second / time.Duration(config.SortSpeed/5))
 			ui.QueueMain(func() {
 				area.QueueRedrawAll()
 				iterationLabel.SetText(strconv.Itoa(config.RunningTotal))
@@ -127,106 +129,76 @@ func bubbleSort(A []int, area *ui.Area, iterationLabel *ui.Label) {
 	fmt.Printf("%d iterations for Bubble Sort \n", config.RunningTotal)
 }
 
-func choosePivot(A []int) int {
-	r := rand.New(rand.NewSource(time.Now().Unix()))
-	return r.Intn(len(A))
+func partition(A []int, l int, h int, area *ui.Area, iterationLabel *ui.Label) int {
+
+	x := A[h]
+	i := l - 1
+
+	for j := l; j <= h-1; j++ {
+		if A[j] <= x {
+			i++
+			A[i], A[j] = A[j], A[i]
+		}
+
+		if config.Stop || config.SortType != 3 {
+			break
+		}
+
+		config.RunningTotal++
+		time.Sleep(time.Second / time.Duration(config.SortSpeed/5))
+		ui.QueueMain(func() {
+			area.QueueRedrawAll()
+			iterationLabel.SetText(strconv.Itoa(config.RunningTotal))
+		})
+	}
+	A[i+1], A[h] = A[h], A[i+1]
+
+	return (i + 1)
 }
 
-// func parition(A []int, p int) int {
-// 	n := len(A)
+func quickSort(A []int, area *ui.Area, iterationLabel *ui.Label) {
+	l := 0
+	h := len(A) - 1
 
-// 	A[n-1], A[p] = A[p], A[n-1]
+	stack := make([]int, h-l+1)
 
-// 	i := -1
-// 	j := n - 1
-// 	v := A[n-1]
+	top := -1
 
-// 	for {
+	top++
+	stack[top] = l
 
-// 		for {
-// 			i++
-// 			if i <= n && A[i] <= v {
-// 				break
-// 			}
-// 		}
+	top++
+	stack[top] = h
 
-// 		for {
-// 			j--
-// 			if j >= 0 && A[i] >= v {
-// 				break
-// 			}
-// 		}
+	for top >= 0 {
+		h = stack[top]
+		top--
+		l = stack[top]
+		top--
 
-// 		if i >= j {
-// 			break
-// 		} else {
-// 			A[i], A[j] = A[j], A[i]
-// 		}
-// 	}
+		if config.Stop || config.SortType != 3 {
+			break
+		}
 
-// 	A[n-1], A[i] = A[i], A[n-1]
+		p := partition(A, l, h, area, iterationLabel)
 
-// 	return i
-// }
+		if p-1 > l {
+			top++
+			stack[top] = l
+			top++
+			stack[top] = p - 1
+		}
 
-func partition(lo int, piv int, arr []int) int {
-	is := lo
-
-	for i := lo; i < piv; i++ {
-		if arr[i] < arr[piv] {
-			if i != is {
-				arr[i], arr[is] = arr[is], arr[i]
-			}
-
-			is++
+		if p+1 < h {
+			top++
+			stack[top] = p + 1
+			top++
+			stack[top] = h
 		}
 	}
 
-	arr[is], arr[piv] = arr[piv], arr[is]
-
-	if is-1 > lo {
-		partition(lo, is-1, arr)
-	}
-	if is+1 < piv {
-		partition(is+1, piv, arr)
+	if config.SortType != 3 {
+		Sort(A, area, iterationLabel)
 	}
 
-	return is
 }
-
-func QuickSort(A []int) {
-	if len(A) <= 1 {
-		return
-	}
-	p := len(A) - 1
-	i := partition(0, p, A)
-	fmt.Println(A)
-	QuickSort(A[:i])
-	QuickSort(A[i+1:])
-}
-
-// func QuickSort(a []int) []int {
-// 	if len(a) < 2 {
-// 		return a
-// 	}
-
-// 	left, right := 0, len(a)-1
-
-// 	pivot := rand.Int() % len(a)
-
-// 	a[pivot], a[right] = a[right], a[pivot]
-
-// 	for i, _ := range a {
-// 		if a[i] < a[right] {
-// 			a[left], a[i] = a[i], a[left]
-// 			left++
-// 		}
-// 	}
-
-// 	a[left], a[right] = a[right], a[left]
-
-// 	QuickSort(a[:left])
-// 	QuickSort(a[left+1:])
-
-// 	return a
-// }

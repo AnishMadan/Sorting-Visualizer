@@ -130,6 +130,7 @@ func setupUI() {
 	typeOfSortComboBox.Append("Insertion")
 	typeOfSortComboBox.Append("Bubble")
 	typeOfSortComboBox.Append("BogoSort")
+	typeOfSortComboBox.Append("QuickSort")
 	typeOfSortComboBox.SetSelected(0) // start with insertion sort
 	typeOfSortComboBox.OnSelected(func(*ui.Combobox) {
 		sortSelected = typeOfSortComboBox.Selected()
@@ -138,7 +139,7 @@ func setupUI() {
 
 	form.Append("Type of Sort ", typeOfSortComboBox, false) //TODO align left
 
-	sortSpeedSlider = ui.NewSlider(2, 1000)
+	sortSpeedSlider = ui.NewSlider(5, 1000)
 	sortSpeedSlider.SetValue(500)
 	config.SortSpeed = 500
 	sortSpeedSlider.OnChanged(func(*ui.Slider) {
