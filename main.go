@@ -101,7 +101,7 @@ func setupUI() {
 
 	shuffleButton = ui.NewButton("Shuffle")
 	shuffleButton.OnClicked(func(*ui.Button) {
-		config.Stop = false
+		config.Stop = true
 		config.RunningTotal = 0
 		shuffle(A)
 		iterationLabel.SetText("")
@@ -131,6 +131,7 @@ func setupUI() {
 	typeOfSortComboBox.Append("Bubble")
 	typeOfSortComboBox.Append("BogoSort")
 	typeOfSortComboBox.Append("QuickSort")
+	typeOfSortComboBox.Append("MergeSort")
 	typeOfSortComboBox.SetSelected(0) // start with insertion sort
 	typeOfSortComboBox.OnSelected(func(*ui.Combobox) {
 		sortSelected = typeOfSortComboBox.Selected()
