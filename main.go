@@ -5,15 +5,18 @@ import (
 	"time"
 
 	"github.com/andlabs/ui"
+	"github.com/anishmadan/Sorting-Visualizer/config"
 	"github.com/anishmadan/Sorting-Visualizer/sorting"
 )
 
 var (
-	iterationLabel *ui.Label
-	sortButton     *ui.Button
-	shuffleButton  *ui.Button
-	typeOfSort     *ui.Combobox
-	attrstr        *ui.AttributedString
+	iterationLabel     *ui.Label
+	sortButton         *ui.Button
+	shuffleButton      *ui.Button
+	stopButton         *ui.Button
+	continueButton     *ui.Button
+	typeOfSortComboBox *ui.Combobox
+	sortSpeedSlider    *ui.Slider
 
 	// A is an array for sorting
 	A            []int
@@ -91,35 +94,58 @@ func setupUI() {
 
 	sortButton = ui.NewButton("Sort")
 	sortButton.OnClicked(func(*ui.Button) {
-		if sortSelected == 0 {
-			go sorting.InsertionSort(A, area, iterationLabel)
-		} else if sortSelected == 1 {
-			go sorting.BubbleSort(A, area, iterationLabel)
-		}
+		config.Stop = false
+		sorting.Sort(A, area, iterationLabel)
 	})
 	vbox.Append(sortButton, false)
 
 	shuffleButton = ui.NewButton("Shuffle")
 	shuffleButton.OnClicked(func(*ui.Button) {
+		config.Stop = false
+		config.RunningTotal = 0
 		shuffle(A)
 		iterationLabel.SetText("")
 		area.QueueRedrawAll()
 	})
 	vbox.Append(shuffleButton, false)
 
+	stopButton = ui.NewButton("Stop")
+	stopButton.OnClicked(func(*ui.Button) {
+		config.Stop = true
+	})
+	vbox.Append(stopButton, false)
+
+	continueButton = ui.NewButton("Continue")
+	continueButton.OnClicked(func(*ui.Button) {
+		config.Stop = false
+		sorting.Sort(A, area, iterationLabel)
+	})
+	vbox.Append(continueButton, false)
+
 	form := ui.NewForm()
 	form.SetPadded(true)
 	vbox.Append(form, false)
 
-	typeOfSort = ui.NewCombobox()
-	typeOfSort.Append("Insertion")
-	typeOfSort.Append("Bubble")
-	typeOfSort.SetSelected(0) // start with insertion sort
-	typeOfSort.OnSelected(func(*ui.Combobox) {
-		sortSelected = typeOfSort.Selected()
+	typeOfSortComboBox = ui.NewCombobox()
+	typeOfSortComboBox.Append("Insertion")
+	typeOfSortComboBox.Append("Bubble")
+	typeOfSortComboBox.Append("BogoSort")
+	typeOfSortComboBox.SetSelected(0) // start with insertion sort
+	typeOfSortComboBox.OnSelected(func(*ui.Combobox) {
+		sortSelected = typeOfSortComboBox.Selected()
+		config.SortType = typeOfSortComboBox.Selected()
 	})
 
-	form.Append("Type of Sort ", typeOfSort, false) //TODO align left
+	form.Append("Type of Sort ", typeOfSortComboBox, false) //TODO align left
+
+	sortSpeedSlider = ui.NewSlider(2, 1000)
+	sortSpeedSlider.SetValue(500)
+	config.SortSpeed = 500
+	sortSpeedSlider.OnChanged(func(*ui.Slider) {
+		config.SortSpeed = sortSpeedSlider.Value()
+	})
+
+	form.Append("Sort Speed", sortSpeedSlider, false)
 
 	iterationLabel = ui.NewLabel("")
 	form.Append("Number of Iterations: ", iterationLabel, false)

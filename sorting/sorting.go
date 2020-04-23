@@ -7,12 +7,64 @@ import (
 	"time"
 
 	"github.com/andlabs/ui"
+	"github.com/anishmadan/Sorting-Visualizer/config"
 )
 
-// InsertionSort implementation
-func InsertionSort(A []int, area *ui.Area, iterationLabel *ui.Label) int {
-	counter := 0
+func Sort(A []int, area *ui.Area, iterationLabel *ui.Label) {
+	if config.SortType == 0 {
+		go insertionSort(A, area, iterationLabel)
+	} else if config.SortType == 1 {
+		go bubbleSort(A, area, iterationLabel)
+	} else if config.SortType == 2 {
+		go bogoSort(A, area, iterationLabel)
+	}
+}
 
+func shuffle(A []int) {
+	r := rand.New(rand.NewSource(time.Now().Unix()))
+	for n := len(A); n > 0; n-- {
+		randIndex := r.Intn(n)
+		A[n-1], A[randIndex] = A[randIndex], A[n-1]
+	}
+}
+
+func isSorted(A []int) bool {
+	for i := range A {
+
+		if i == len(A)-1 {
+			break
+		}
+
+		if A[i] > A[i+1] {
+			return false
+		}
+	}
+	return true
+}
+
+func bogoSort(A []int, area *ui.Area, iterationLabel *ui.Label) {
+	for !isSorted(A) {
+		shuffle(A)
+		config.RunningTotal++
+		if config.Stop || config.SortType != 2 {
+			break
+		}
+		time.Sleep(time.Second / time.Duration(config.SortSpeed/2))
+		ui.QueueMain(func() {
+			area.QueueRedrawAll()
+			iterationLabel.SetText(strconv.Itoa(config.RunningTotal))
+		})
+		fmt.Println(A)
+	}
+
+	if config.SortType != 2 {
+		Sort(A, area, iterationLabel)
+	}
+
+}
+
+// InsertionSort implementation
+func insertionSort(A []int, area *ui.Area, iterationLabel *ui.Label) {
 	i := 1
 	for i < len(A) {
 		j := i
@@ -20,40 +72,59 @@ func InsertionSort(A []int, area *ui.Area, iterationLabel *ui.Label) int {
 		for j > 0 && A[j-1] > A[j] {
 			A[j], A[j-1] = A[j-1], A[j]
 			j--
-			counter++
-			time.Sleep(time.Second / 200)
+			config.RunningTotal++
+
+			if config.Stop || config.SortType != 0 {
+				i = len(A) // outer loop
+				break
+			}
+
+			time.Sleep(time.Second / time.Duration(config.SortSpeed/2))
 			ui.QueueMain(func() {
 				area.QueueRedrawAll()
-				iterationLabel.SetText(strconv.Itoa(counter))
+				iterationLabel.SetText(strconv.Itoa(config.RunningTotal))
 			})
 			fmt.Println(A)
 		}
 
 		i++
 	}
-	fmt.Printf("%d iterations for Insertion Sort \n", counter)
-	return counter
+
+	if config.SortType != 0 {
+		Sort(A, area, iterationLabel)
+	}
+
+	fmt.Printf("%d iterations for Insertion Sort \n", config.RunningTotal)
 }
 
 // BubbleSort implementation
-func BubbleSort(A []int, area *ui.Area, iterationLabel *ui.Label) int {
-	counter := 0
+func bubbleSort(A []int, area *ui.Area, iterationLabel *ui.Label) {
 	for i := 0; i < len(A); i++ {
 		for j := 0; j < len(A)-i-1; j++ {
 			if A[j] > A[j+1] {
 				A[j], A[j+1] = A[j+1], A[j]
 			}
+
+			if config.Stop || config.SortType != 1 {
+				i = len(A) // outer loop
+				break
+			}
+
 			fmt.Println(A)
-			counter++
-			time.Sleep(time.Second / 200)
+			config.RunningTotal++
+			time.Sleep(time.Second / time.Duration(config.SortSpeed/2))
 			ui.QueueMain(func() {
 				area.QueueRedrawAll()
-				iterationLabel.SetText(strconv.Itoa(counter))
+				iterationLabel.SetText(strconv.Itoa(config.RunningTotal))
 			})
 		}
 	}
-	fmt.Printf("%d iterations for Bubble Sort \n", counter)
-	return counter
+
+	if config.SortType != 1 {
+		Sort(A, area, iterationLabel)
+	}
+
+	fmt.Printf("%d iterations for Bubble Sort \n", config.RunningTotal)
 }
 
 func choosePivot(A []int) int {
