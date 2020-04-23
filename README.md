@@ -1,6 +1,8 @@
 # Sorting-Visualizer
 
-using https://github.com/andlabs/ui
+to set up run
+
+``` go get github.com/andlabs/ui ```
 
 run with 
 
