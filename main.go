@@ -132,6 +132,7 @@ func setupUI() {
 	typeOfSortComboBox.Append("BogoSort")
 	typeOfSortComboBox.Append("QuickSort")
 	typeOfSortComboBox.Append("MergeSort")
+	typeOfSortComboBox.Append("HeapSort")
 	typeOfSortComboBox.SetSelected(0) // start with insertion sort
 	typeOfSortComboBox.OnSelected(func(*ui.Combobox) {
 		sortSelected = typeOfSortComboBox.Selected()
