@@ -21,6 +21,7 @@ var (
 	// A is an array for sorting
 	A            []int
 	sortSelected int
+	first        bool
 )
 
 func setup(A []int) {
@@ -44,7 +45,7 @@ func (areaHandler) Draw(a *ui.Area, dp *ui.AreaDrawParams) {
 
 	for i, x := range A {
 		p.NewFigure(0, 0)
-		p.AddRectangle((float64)(i*10+15), 0, 5, (float64)(7*x))
+		p.AddRectangle((float64)(i*10+15), 0, 5, (float64)(5*x))
 	}
 	p.End()
 
@@ -95,7 +96,11 @@ func setupUI() {
 	sortButton = ui.NewButton("Sort")
 	sortButton.OnClicked(func(*ui.Button) {
 		config.Stop = false
-		sorting.Sort(A, area, iterationLabel)
+		if first {
+			sorting.SortSetup(A, area, iterationLabel)
+			first = false
+		}
+		sorting.SortDecider()
 	})
 	vbox.Append(sortButton, false)
 
@@ -118,7 +123,7 @@ func setupUI() {
 	continueButton = ui.NewButton("Continue")
 	continueButton.OnClicked(func(*ui.Button) {
 		config.Stop = false
-		sorting.Sort(A, area, iterationLabel)
+		sorting.SortDecider()
 	})
 	vbox.Append(continueButton, false)
 
@@ -162,6 +167,7 @@ func main() {
 	A = make([]int, 100)
 	setup(A)
 	shuffle(A)
+	first = true
 
 	ui.Main(setupUI)
 }
