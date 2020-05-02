@@ -73,11 +73,13 @@ func (areaHandler) KeyEvent(a *ui.Area, ke *ui.AreaKeyEvent) (handled bool) {
 func setupUI() {
 	mainwin := ui.NewWindow("Sorting Examples", 1640, 1480, true)
 	mainwin.SetMargined(true)
+
 	mainwin.OnClosing(func(*ui.Window) bool {
 		mainwin.Destroy()
 		ui.Quit()
 		return false
 	})
+
 	ui.OnShouldQuit(func() bool {
 		mainwin.Destroy()
 		return true
@@ -96,12 +98,9 @@ func setupUI() {
 	sortButton = ui.NewButton("Sort")
 	sortButton.OnClicked(func(*ui.Button) {
 		config.Stop = false
-		if first {
-			sorting.SortSetup(A, area, iterationLabel)
-			first = false
-		}
 		sorting.SortDecider()
 	})
+
 	vbox.Append(sortButton, false)
 
 	shuffleButton = ui.NewButton("Shuffle")
@@ -109,8 +108,8 @@ func setupUI() {
 		config.Stop = true
 		config.RunningTotal = 0
 		shuffle(A)
-		iterationLabel.SetText("")
-		area.QueueRedrawAll()
+		iterationLabel.SetText("0")
+		go area.QueueRedrawAll()
 	})
 	vbox.Append(shuffleButton, false)
 
@@ -159,6 +158,8 @@ func setupUI() {
 	form.Append("Number of Iterations: ", iterationLabel, false)
 
 	hbox.Append(area, true)
+
+	sorting.SortSetup(A, area, iterationLabel)
 
 	mainwin.Show()
 }
